@@ -32,8 +32,10 @@ class Player(Actor):
 
     def __init__(self):
         Actor.__init__(self, playerImage)
+        self.life = 1
         # A CADA SPACE apertado somente sai um tiro
         self.reloading = 0
+        # CRIA O PLAYER NO MEIO DA TELA
         self.rect.centerx = SCREENRECT.centerx
         self.rect.bottom = SCREENRECT.bottom - 25
 
@@ -71,14 +73,26 @@ class Shot(Actor):
         self.rect.top = self.rect.top - SHOT_SPEED
 
 
+class Explosion(Actor):
+
+    def __init__(self, actor):
+        Actor.__init__(self, shotImage)
+        self.life = 2
+        self.rect.center = actor.rect.center
+
+    def update(self):
+        self.life = self.life - 1
+
+
 pygame.init()
 
 screen = pygame.display.set_mode(SCREENRECT.size)
 
 # CRIA AS SPRITES
 player = Player()
-alien = Alien()
+aliens = [Alien()]
 shots = []
+explosions = []
 
 # LOOP ETERNO
 while 1:
@@ -104,12 +118,29 @@ while 1:
             shots.remove(shot)
 
     # ATUALIZA O RECT DOS OBJETOS
-    for actor in [player] + [alien] + shots:
+    for actor in [player] + aliens + shots + explosions:
         actor.update()
+
+    # CRIA COLISAO COLISAO
+    alienrects = []
+    for a in aliens:
+        alienrects.append(a.rect)
+
+    hit = player.rect.collidelist(alienrects)
+    for shot in shots:
+        hit = shot.rect.collidelist(alienrects)
+        if hit != -1:
+            alien = aliens[hit]
+            explosions.append(Explosion(alien))
+            shots.remove(shot)
+            aliens.remove(alien)
+            aliens.append(Alien())
+            break
 
     # UPDATE NOS RECT PARA ATUALIZAR A TELA
     screen.blit(background, (0, 0))
-    screen.blit(alienImage, alien.rect)
+    for a in aliens:
+        screen.blit(alienImage, a.rect)
     screen.blit(playerImage, player.rect)
     for shot in shots:
         screen.blit(shotImage, shot.rect)
