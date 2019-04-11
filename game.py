@@ -8,6 +8,7 @@ SCREENRECT = Rect(0, 0, 640, 640)
 PLAYER_SPEED = 12
 ALIEN_SPEED = 10
 SHOT_SPEED = 10
+MAX_SHOTS = 2
 
 
 # IMAGENS
@@ -23,11 +24,16 @@ class Actor:
         self.image = image
         self.rect = image.get_rect()
 
+    def update(self):
+        pass
+
 
 class Player(Actor):
 
     def __init__(self):
         Actor.__init__(self, playerImage)
+        # A CADA SPACE apertado somente sai um tiro
+        self.reloading = 0
         self.rect.centerx = SCREENRECT.centerx
         self.rect.bottom = SCREENRECT.bottom - 25
 
@@ -72,7 +78,8 @@ screen = pygame.display.set_mode(SCREENRECT.size)
 # CRIA AS SPRITES
 player = Player()
 alien = Alien()
-shot = Shot(player)
+shots = []
+
 # LOOP ETERNO
 while 1:
 
@@ -87,16 +94,23 @@ while 1:
     player.move(direction)
 
     # CRIA O TIRO
-    if keystate[K_SPACE]:
-        shot = Shot(player)
+    if not player.reloading and keystate[K_SPACE] and len(shots) < MAX_SHOTS:
+        shots.append(Shot(player))
+    player.reloading = keystate[K_SPACE]
+
+    # LIMPA O TIRO FORA DA TELA
+    for shot in shots:
+        if shot.rect.top <= 0:
+            shots.remove(shot)
 
     # ATUALIZA O RECT DOS OBJETOS
-    alien.update()
-    shot.update()
+    for actor in [player] + [alien] + shots:
+        actor.update()
 
     # UPDATE NOS RECT PARA ATUALIZAR A TELA
     screen.blit(background, (0, 0))
     screen.blit(alienImage, alien.rect)
     screen.blit(playerImage, player.rect)
-    screen.blit(shotImage, shot.rect)
+    for shot in shots:
+        screen.blit(shotImage, shot.rect)
     pygame.display.flip()
