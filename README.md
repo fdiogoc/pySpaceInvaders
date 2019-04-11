@@ -7,7 +7,7 @@ Space_Invaders
 - Regras do Jogo:
 
 * Escolha da quantidade de inimigos;
-* Perde se os inimigos chegarem ao chão;
+* Perde sse os inimigos chegarem ao chão;
 * Jogo em turnos;
 * Jogador preso ao chão (inferior da tela) e, movimentos apenas p/ esquerda e direita;
 * Movimento limitado a: movimentar para direita/esquerda, atirar ou permanecer parado;
@@ -17,5 +17,6 @@ Space_Invaders
 * Ao acertar um tiro, o inimigo desaparece, ganha-se uma pontuação "x" e aparece uma explosão;
 
 https://www.pygame.org/news
+https://www.pygame.org/docs/tut/ChimpLineByLine.html
 sprites:
 https://kenney.nl
