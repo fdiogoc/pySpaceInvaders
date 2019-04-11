@@ -16,6 +16,7 @@ playerImage = pygame.image.load("player.png")
 alienImage = pygame.image.load("alien.png")
 background = pygame.image.load("background.png")
 shotImage = pygame.image.load("bullet.png")
+explosionImage = pygame.image.load("explosion.png")
 
 
 class Actor:
@@ -76,8 +77,8 @@ class Shot(Actor):
 class Explosion(Actor):
 
     def __init__(self, actor):
-        Actor.__init__(self, shotImage)
-        self.life = 2
+        Actor.__init__(self, explosionImage)
+        self.life = 10
         self.rect.center = actor.rect.center
 
     def update(self):
@@ -112,10 +113,13 @@ while 1:
         shots.append(Shot(player))
     player.reloading = keystate[K_SPACE]
 
-    # LIMPA O TIRO FORA DA TELA
+    # LIMPA TIROS E EXPLOSOES
     for shot in shots:
         if shot.rect.top <= 0:
             shots.remove(shot)
+    for explosion in explosions:
+        if explosion.life <=0:
+            explosions.remove(explosion)
 
     # ATUALIZA O RECT DOS OBJETOS
     for actor in [player] + aliens + shots + explosions:
@@ -134,6 +138,7 @@ while 1:
             explosions.append(Explosion(alien))
             shots.remove(shot)
             aliens.remove(alien)
+            # CRIA NOVO ALIEN
             aliens.append(Alien())
             break
 
@@ -144,4 +149,6 @@ while 1:
     screen.blit(playerImage, player.rect)
     for shot in shots:
         screen.blit(shotImage, shot.rect)
+    for explosion in explosions:
+        screen.blit(explosionImage, explosion.rect)
     pygame.display.flip()
