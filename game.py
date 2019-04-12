@@ -9,6 +9,7 @@ PLAYER_SPEED = 12
 ALIEN_SPEED = 10
 SHOT_SPEED = 10
 MAX_SHOTS = 2
+RESPAW_ALIEN = 1300
 
 
 # IMAGENS
@@ -95,14 +96,25 @@ aliens = [Alien()]
 shots = []
 explosions = []
 
-# LOOP ETERNO
-while 1:
+tempo = 0
+clock = pygame.time.Clock()
+
+# LOOP ENQUANTO O PLAYER ESTA VIVO
+while player.life:
 
     # EVENTO DE EXIT
     keystate = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+
+    dt = clock.tick()
+
+    tempo += dt
+
+    if tempo > RESPAW_ALIEN:
+        aliens.append(Alien())
+        tempo = 0
 
     # MOVE O JOGADOR
     direction = keystate[K_RIGHT] - keystate[K_LEFT]
@@ -118,19 +130,25 @@ while 1:
         if shot.rect.top <= 0:
             shots.remove(shot)
     for explosion in explosions:
-        if explosion.life <=0:
+        if explosion.life <= 0:
             explosions.remove(explosion)
 
     # ATUALIZA O RECT DOS OBJETOS
     for actor in [player] + aliens + shots + explosions:
         actor.update()
 
-    # CRIA COLISAO COLISAO
+    # CRIA COLISAO
     alienrects = []
     for a in aliens:
         alienrects.append(a.rect)
 
+    # collidelist retorna -1 caso falso ou o index
     hit = player.rect.collidelist(alienrects)
+    if hit != -1:
+        alien = aliens[hit]
+        explosions.append(Explosion(alien))
+        explosions.append(Explosion(player))
+        player.life = player.life - 1
     for shot in shots:
         hit = shot.rect.collidelist(alienrects)
         if hit != -1:
@@ -142,7 +160,7 @@ while 1:
             aliens.append(Alien())
             break
 
-    # UPDATE NOS RECT PARA ATUALIZAR A TELA
+    # BLIT NOS RECTS PARA ATUALIZAR A TELA
     screen.blit(background, (0, 0))
     for a in aliens:
         screen.blit(alienImage, a.rect)
